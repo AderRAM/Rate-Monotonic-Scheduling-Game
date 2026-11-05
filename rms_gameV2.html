@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Treinador de Escalonamento em Tempo Real</title>
+<style>
+:root{
+  --bg:#1d0e08; --panel:#2c1810; --panel2:#3a2214; --line:#5a3520;
+  --red:#ff3b2f; --orange:#ff9d3d; --cream:#fbefc4; --olive:#a8b04a; --muted:#c9a882; --gold:#e0b040;
+  --ok:#a8b04a; --bad:#ff3b2f; --text:#fbefc4;
+  color-scheme:dark;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  --img:url("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wgARCAMTBXgDASIAAhEBAxEB/8QAGwAAAwEBAQEBAAAAAAAAAAAAAAECAwQFBgf/xAAaAQADAQEBAQAAAAAAAAAAAAAAAQIDBAUG/9oADAMBAAIQAxAAAAH5ouefRDGOQABghgIYCYAmAIYCGAhgAxAxqj0/Nua25ve1a+ej0uQOdjCZ0lqRjlFIEAAAAMBDBiYCGAhgkMGhgIYAAAAAmAhsEMBDEJjGhgANNUmmmxMHurjau5a5dmj05pbbiSm1JQCKEpbGIYCKESUBJQySgJz2EeRw/S88dfgrpwjsgpEyUnEjHEjCJGOZVpzBScoYJDGkMBDBJUgQwEMBMYS2ADaaG1UttVJTHCsCCgmChzBSpJUhIbCS2iFaalUMkoCSgLz0iWlSqUMBDAQwBMBDARSBMYJMAGAmAxpofq+Vuq9TPyhPp5GmkA0hoQmMQwEMEhgAxOSrZmXKEMBFA0qESUMkbCSgJbAQ0AMBDEIYAMGhtCG00NjVG6s0fprad6NOSRjQ3QpbQAADQJkgUUCkoCSgEMBDAQwEUBn5PtJafML1PNy9OFaHKpGaVDiVQRKocSqHMFJyhgkMaQ0AMFJSBDABgJjTTYqG3OidUtoOzZrzV6XMPlWiU5q1WMK04kY5VKhjZGkqhqVohZmiqYLBKdYThUrhDBIYCGAhgIYCKQIYNDBIYNMAGmAAmxMEwCRjSGAikCGAhgIoTXRgwpAnJYnJQOSkKRjEwEgAAAAYIYCGAhgIbBDE0NgmxNM3Vgu6enXsw6teMbdRLYks1mVd52JjQAADGK3NtIYJDAQAAwEMBDYSUBPl+sK/lV6PBj60FIJGPORhnIxxIwmSk5ltEoaaAYkNCQxgmADEA2qTbVlG09FetpevNKvyant3+a+jWvL5X0fJJ4k6TnpmUqwlUOJbYIABpp0JrUTARQEqgzzVq4gtOYGNIYCGAhgIYCHuHOeox+UaQJDGIYhMBgMEmAhsUtgIYNFNEltVDtzUOhVJqgzdQAhORBUiY0hgIbCRtEjAAABg0UgTGmhgAxNNsdlKet7Zegtd+lvbzFXPsJ5KBjGmMpp0U5lWgTGCtUIYxJVIIY2lUopzQhUgCgUlAZ/P/Scs9Hzq0jL1ZKREjHnIwzSpPNKk5SpEoY5koFI2ElAkMBDY0xzQxrR+t5f0FVo2tOTm+c6uSPVOzja2+qOH0L8fwuX1PMy681SeMjHmkxyhgIYADTGNUDJ2FSecLRVnmUnMqipkYCGAhgIYCYA5YCGAhgIpAhgIoBKgBU04dtVDtzUOqVZnSmY6rIeswiRCEIKhDGIGAmIQwEMBMYSUBJQCGDRSQDBpsTTBM1jR6CTjr7PU4fS14nGmVYQapPAtFKnoKKocjKaQ2EFMFYyUMBKwIWkjkoCKEFNUIVAobBoYLxPO+o+ay9XNUo6ZGPKRhmlSeaVIhKk5QwlKk0hsSGAhgkMTBhRSqdH9H877lPp830fnaXKaKfThW2dP0Hie2vO8/wAn0OBVCqTJDHnIwlDYSaIqG2CGKgBVSpJpUnElDUGgGa1AxWk3lIxpDAQwEMBDYSUIkoBFg4duah01Ulbquc7EzHWMQ6IxBAgBCJaCpQwEMEhgS2DQwEUAhtOS0OSgUjATAAYmhgAwaG1e+Q10pgqrfnZW/V5/UL2Va6PLxnWE1pNsa0BRQxJjCSkBUUFDbmSgJVIJKByqBpiFTliaYCGwnx/a551+anSMPaSY4kYZSUnmk");
+  --ov:rgba(255,241,214,.82);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a0d08;--ov:rgba(26,13,8,.8);--card:rgba(40,18,12,.88);--ink:#ffeccf;--mut:#d1a98a;--line:rgba(255,160,110,.26);--acc:#ff5a36;--ok:#b6e35a;--bad:#ff8a7a;--mid:#ffc15a;--idle:#4a2a1e;--emp:#2a120c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1a0d08;--ov:rgba(26,13,8,.8);--card:rgba(40,18,12,.88);--ink:#ffeccf;--mut:#d1a98a;--line:rgba(255,160,110,.26);--acc:#ff5a36;--ok:#b6e35a;--bad:#ff8a7a;--mid:#ffc15a;--idle:#4a2a1e;--emp:#2a120c;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;padding:14px;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45;position:relative}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(var(--ov),var(--ov)),var(--img) center/cover no-repeat}
+.w{max-width:820px;margin:0 auto}
+.hero{position:relative;height:210px;border-radius:16px;margin-bottom:14px;overflow:hidden;border:1px solid var(--line);background:var(--img) 38% 58%/cover}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--card),transparent 72%)}
+.hero h1{position:absolute;z-index:1;left:16px;bottom:34px;margin:0;text-align:left;font-size:1.7rem;color:var(--ink)}
+.hero p{position:absolute;z-index:1;left:16px;bottom:12px;margin:0;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.h1{font-size:1.35rem;text-align:center;margin:4px 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.k{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:0 0 8px}
+.stats{display:flex;justify-content:space-around;text-align:center;gap:6px}
+.stats b{display:block;font-size:1.3rem}.stats span{font-size:.72rem;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+button,select{font:inherit;font-weight:600;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.tabs button{flex:1}.tabs button.on,button.p{background:var(--acc);border-color:var(--acc);color:#fff}
+button:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row.c{justify-content:center}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th{font-size:.72rem;text-transform:uppercase;color:var(--mut);text-align:left;padding:4px}
+td{padding:5px 4px;border-top:1px solid var(--line)}
+.dot{display:inline-block;padding:1px 10px;border-radius:8px;color:#fff;font-weight:800}
+.met{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0 6px;font-weight:700;font-size:.9rem}
+.v{padding:8px 12px;border-radius:10px;font-weight:600;font-size:.9rem;border:1px solid}
+.v.ok{color:var(--ok)}.v.bad{color:var(--bad)}.v.mid{color:var(--mid)}
+.g{display:flex;gap:3px;overflow-x:auto;padding:4px 0 8px}
+.col{flex:1 0 32px;text-align:center}
+.cell{height:42px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.78rem;border:2px solid transparent}
+.cell.idle{background:var(--idle);color:var(--mut)}
+.cell.empty{background:var(--emp);border:2px dashed var(--line)}
+.cell.ok{border-color:var(--ok)}.cell.bad{border-color:var(--bad);box-shadow:0 0 0 2px var(--bad) inset}
+.col .n{font-size:.7rem;color:var(--mut)}
+.mk{height:12px;display:flex;justify-content:center;gap:2px}
+.mk i{width:7px;height:7px;border-radius:50%;display:block}
+.leg{font-size:.78rem;color:var(--mut);margin:0}
+.pal button{border:2px solid var(--line);font-weight:800}
+.pal button.sel{outline:3px solid var(--ink);outline-offset:1px}
+.say{background:var(--emp);border-left:4px solid var(--acc);border-radius:0 10px 10px 0;padding:10px 12px;font-size:.92rem;margin-top:8px}
+.fb{margin-top:10px;padding:10px 12px;border-radius:10px;font-weight:600;border:1px solid}
+.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
+.rules li{margin:3px 0;font-size:.92rem}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="w">
+<div class="hero"><h1>RMS Scheduling Trainer</h1><p>Rate monotonic scheduling</p></div>
+<div class="card stats" id="stats"></div>
+<div class="tabs" id="tabs"></div>
+<div id="app"></div>
+</div>
+
+<script>
+
+const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,pick=a=>a[ri(0,a.length-1)]
+const gcd=(a,b)=>b?gcd(b,a%b):a,lcm=(a,b)=>a/gcd(a,b)*b
+const shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1])
+const COL=['#e63b2e','#f08a24','#7d8b2f','#c2417a','#8c5a2b','#3f8f8b']
+const DN=['Easy','Normal','Hard','Expert','Alien']
+const POOL=[[2,3,4,6],[2,3,4,6,8],[3,4,6,8,12],[3,4,6,8,12],[4,6,8,12,24]]
+const CORES=COL // alias for consistency with original V2 code
+const S={mode:'learn',d:1,score:0,streak:0,best:0,ts:[],N:0,ref:null,slots:[],sel:null,hints:0,res:null,step:0,fb:'',q:null,done:false,timer:null}
+try{S.best=+localStorage.getItem('rmsBest')||0}catch(e){}
+// Single dollar sign selector
+const $=id=>document.getElementById(id)
+
+// ===== VALIDITY GUARDRAILS =====
+function llBound(n){return n*(Math.pow(2,1/n)-1)}
+function rmsSimulate(ts, horizon){
+  const rem=ts.map(()=>0),slots=[],log=[],miss=[]
+  for(let t=0;t<horizon;t++){
+    ts.forEach((k,i)=>{if(t%k.T===0){if(rem[i]>0)miss.push({i,t});rem[i]=k.C}})
+    const ready=ts.filter((k,i)=>rem[i]>0)
+    if(ready.length){
+      const r=ready[0];rem[r.id]--;slots.push(r.name)
+      log.push(`t=${t}: running.`)
+    }else{slots.push('IDLE');log.push(`t=${t}: CPU idle.`)}
+  }
+  ts.forEach((k,i)=>{if(rem[i]>0)miss.push({i,horizon})})
+  return{slots,log,miss}
+}
+function validateTaskSet(ts){
+  const n=ts.length,utilization=ts.reduce((u,t)=>u+t.C/t.T,0),bound=llBound(n)
+  let message=''
+  if(utilization>1.0){message+='U > 100%: no scheduler can meet all deadlines. '}
+  else if(utilization<=bound){message+='U ≤ Liu-Layland bound: RMS guarantees every deadline is met. '}
+  else{message+='U between bound and 100%: inconclusive - simulation needed. '}
+  const horizon=Math.min(100, ts.reduce((a,k)=>lcm(a,k.T),1)||24)
+  const sim=rmsSimulate(ts, horizon)
+  if(sim.miss.length>0){
+    message+='Simulação: misses de deadline: '
+    sim.miss.slice(0,3).forEach(m=>{
+      message+=`${ts[m.i].name} em t=${m.t}; `
+    })
+    if(sim.miss.length>3)message+=`+${sim.miss.length-3} mais`
+  }else{message+='Todos os prazos cumpridos na simulação.'}
+  return{valid:utilization<=1.0&&sim.miss.length===0, utilization:(utilization*100).toFixed(1), bound:(bound*100).toFixed(1), message, horizon, sim}
+}
+// ===== END VALIDITY GUARDRAILS =====
+
+const ALGORITMOS={RM:'Rate Monotonic',EDF:'Earliest Deadline First',DM:'Deadline Monotonic'}
+const PRESETS=[
+  {t:'Questão 1 (1 pt)',H:80,algos:['RM'],tarefas:[[50,null,15,3],[40,null,10,2],[30,null,10,1]]},
+  {t:'Questão 2 (1 pt)',H:80,algos:['RM','EDF','DM'],tarefas:[[20,5,3,1],[15,7,3,2],[10,10,4,3],[20,20,2,4]]},
+  {t:'Questão 3 (1,5 pt)',H:80,algos:['RM','EDF','DM'],tarefas:[[20,15,3,0],[15,17,3,1],[10,11,4,2],[20,20,2,3]]},
+  {t:'Questão 4 (1,5 pt)',H:80,algos:['RM','EDF','DM'],tarefas:[[15,15,3,1],[17,21,3,2],[18,21,4,3],[21,23,2,4]]}
+]
+let tarefas=[],H=80,req=[],pontuacao=0,sequencia=0,previsao={},ferramenta=0,slots=[],pintando=false,solAberta=false
+
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a
+
+/* ---------- modelo ---------- */
+function D(i,algo){const t=tarefas[i];const base=t.d||t.p;if(algo==='DM')return base;return$('ruleP').checked?t.p:base}
+function rank(algo){const idx=tarefas.map((_,i)=>i);if($('prSrc').value==='sugg')idx.sort((a,b)=>tarefas[a].pr-tarefas[b].pr||a-b);else if(algo==='DM')idx.sort((a,b)=>D(a,'DM')-D(b,'DM')||a-b);else idx.sort((a,b)=>tarefas[a].p-tarefas[b].p||a-b);const r=[];idx.forEach((i,k)=>r[i]=k);return r}
+function simular(algo){const out=[],jobs=[],r=rank(algo);let falha=null,ultimo=-1;for(let t=0;t<=H;t++){for(const j of jobs)if(j.rem>0&&j.abs<=t&&!falha){falha={t:j.abs,task:j.i}};if(falha||t===H)break;tarefas.forEach((tk,i)=>{if(t%tk.p===0)jobs.push({i,rem:tk.c,rel:t,abs:t+D(i,algo)})});const ativos=jobs.filter(j=>j.rem>0);let escolhido=null;if(ativos.length){ativos.sort((a,b)=>{if(algo==='EDF'){return a.abs-b.abs||((b.i===ultimo)-(a.i===ultimo))||a.rel-b.rel||a.i-b.i}return r[a.i]-r[b.i]||a.rel-b.rel})}escolhido=ativos[0];escolhido.rem--;if(escolhido.rem===0)escolhido.fim=t+1}ultimo=escolhido?escolhido.i:-1;out.push(ultimo)}return{slots:out,falha,jobs}
+function utilizacao(){return tarefas.reduce((s,t)=>s+t.c/t.p,0)}
+
+/* ---------- gráfico ---------- */
+function renderizarChart(){let h='<tr><th></th><th>Período</th><th>Deadline relativo (D)</th><th>Computação</th><th>Prioridade sugerida</th></tr>';tarefas.forEach((t,i)=>{h+=`<tr><td class="name" style="background:${CORES[i%8]}">TAREFA${i+1}</td><td><input type="number" min="1" value="${t.p}" onchange="editar(${i},'p',this.value)"></td><td><input type="number" min="1" value="${t.d??''}" placeholder="=P" onchange="editar(${i},'d',this.value)"></td><td><input type="number" min="1" value="${t.c}" onchange="editar(${i},'c',this.value)"></td><td><input type="number" value="${t.pr}" onchange="editar(${i},'pr',this.value)"></td></tr>`})$('chart').innerHTML=h}
+function editar(i,k,v){const n=Math.round(+v);if(k==='p'||k==='c')tarefas[i][k]=(v===''||!isFinite(n))?1:Math.max(1,n);else if(k==='d')tarefas[i][k]=(v===''||!isFinite(n))?null:Math.max(1,n);else tarefas[i][k]=(v===''||!isFinite(n))?0:n;atualizar()}
+function adicionarTarefa(){if(tarefas.length>=8)return;tarefas.push({p:20,d:null,c:2,pr:tarefas.length+1});atualizar()}
+function removerTarefa(){if(tarefas.length>1)tarefas.pop();atualizar()}
+function definirH(){H=Math.max(10,Math.min(200,+$('H').value||80));atualizar()}
+
+/* ---------- validação de tarefa set ---------- */
+function validarTarefaSet(){const result=validateTaskSet(tarefas);const fbClass=result.utilization<=result.bound?'ok':'bad';const utilNum=parseFloat(result.utilization)let fbMsg=`<div class="fb ${fbClass}">`if(utilNum>100){fbMsg+='<b>Utilização inválida:</b> U > 100%. Nenhum algoritmo pode garantir prazos.'}else if(utilNum<=parseFloat(result.bound)){fbMsg+='<b>Utilização válida:</b> U ≤ bound de Liu-Layland. Garantia de prazos RMS.'}else{fbMsg+='<b>Utilização atenção:</b> U acima do bound, mas < 100%. Simulação necessária.'}if(result.sim.miss.length>0){fbMsg+='<br><b>Atenção:</b> Simulação mostrou misses de deadline:<br>'result.sim.miss.slice(0,3).forEach(m=>{fbMsg+=`${tarefas[m.i].name} em t=${m.t}; `})if(result.sim.miss.length>3)fbMsg+=`+${result.sim.miss.length-3} mais`}else{fbMsg+='<br><b>OK:</b> Todos os prazos cumpridos na simulação.'}fbMsg+='</div>'$('predFb').innerHTML=fbMsg;return result.valid}
+/* ---------- anatômica ---------- */
+function renderizarAnatomia(){const W=Math.min(H,Math.max(...tarefas.map(t=>t.p))*2+10),u=14,L=64,rh=38;let s=`<svg width="${W*u+L+10}" height="${tarefas.length*rh+28}" viewBox="0 0 ${W*u+L+10} ${tarefas.length*rh+28}">`for(let t=0;t<=W;t+=5)s+=`<line x1="${L+t*u}" y1="4" x2="${L+t*u}" y2="${tarefas.length*rh+4}" stroke="#5a3520" stroke-width="1" stroke-dasharray="2 3"/><text x="${L+t*u}" y="${tarefas.length*rh+20}" fill="#c9a882" font-size="10" text-anchor="middle">${t}</text>`tarefas.forEach((t,i)=>{const y=i*rh+8,c=CORES[i%8];s+=`<text x="4" y="${y+20}" fill="${c}" font-size="13" font-weight="bold">TAREFA${i+1}</text>`for(let k=0;k*t.p<W;k++){const r=k*t.p,x=L+r*u,dl=r+(t.d||t.p);s+=`<rect x="${x}" y="${y+10}" width="${t.c*u}" height="14" rx="3" fill="${c}" opacity=".85"/>`s+=`<path d="M${x} ${y+28} V${y+2} M${x-4} ${y+7} L${x} ${y+1} L${x+4} ${y+7}" stroke="#fbefc4" fill="none" stroke-width="1.5"/>`if(dl<=W){const dx=L+dl*u;s+=`<path d="M${dx} ${y+4} l5 6 l-5 6 l-5 -6 z" fill="#ff3b2f" stroke="#fbefc4" stroke-width="1"/>`}}}$('anatomy').innerHTML=s+'</svg>'}
+/* ---------- gantt ---------- */
+function gantt(res){const u=Math.max(8,Math.min(14,Math.floor(880/H))),L=58,rh=26,n=tarefas.length,len=H;let s=`<svg width="${len*u+L+10}" height="${n*rh+30}">`tarefas.forEach((t,i)=>{const y=i*rh+4;s+=`<text x="2" y="${y+16}" fill="${CORES[i%8]}" font-size="12" font-weight="bold">TAREFA${i+1}</text><line x1="${L}" x2="${L+len*u}" y1="${y+22}" y2="${y+22}" stroke="#3a2214"/>`}res.slots.forEach((v,x)=>{if(v===i)s+=`<rect x="${L+x*u}" y="${y+2}" width="${u-1}" height="18" rx="2" fill="${CORES[i%8]}"/>`})for(let t=0;t<=len;t+=10)s+=`<text x="${L+t*u}" y="${n*rh+20}" fill="#c9a882" font-size="10" text-anchor="middle">${t}</text>`if(res.falha){const x=L+res.falha.t*u;s+=`<line x1="${x}" x2="${x}" y1="0" y2="${n*rh+4}" stroke="#ff3b2f" stroke-width="2"/><text x="${x+4}" y="12" fill="#ff3b2f" font-size="11" font-weight="bold">FALHA</text>}`}return`<div class="scroll">${s}</svg></div>`}
+function veredito(res,algo){return res.falha?`<span class="verdict-bad">Falha</span>: TAREFA${res.falha.task+1} perde o deadline em t=${res.falha.t}`:`<span class="verdict-ok">Funciona</span> até t=${H}`}
+function mostrarSolucao(){solAberta=!solAberta;renderizarSolucao()}
+function renderizarSolucao(){if(!solAberta){$('sol').innerHTML='';return}$('sol').innerHTML=`<div class="hint">Utilização da CPU U = ${(utilizacao()*100).toFixed(1)}%</div>`+Object.keys(ALGORITMOS).map(a=>{const r=simular(a);return `<div class="algo"><b>${ALGORITMOS[a]}</b> ${req.includes(a)?'<span class="pill req">pedido</span>':''}<br>${veredito(r,a)}${gantt(r)}</div>`}).join('')}
+/* ---------- previsão ---------- */
+function renderizarPrevisao(){$('predict').innerHTML=Object.keys(ALGORITMOS).map(a=>`<div class="algo row" style="justify-content:space-between"><span><b>${ALGORITMOS[a]}</b> ${req.includes(a)?'<span class="pill req">pedido</span>':'<span class="pill">extra</span>'}</span><span class="row"><button class="btn alt ${previsao[a]===true?'on':''}" onclick="p('${a}',true)">Funciona</button><button class="btn alt ${previsao[a]===false?'on':''}" onclick="p('${a}',false)">Falha</button></span></div>`).join('')}
+function p(a,v){previsao[a]=v;renderizarPrevisao()}
+function revelarPrevisao(){const chaves=Object.keys(ALGORITMOS)if(chaves.some(a=>previsao[a]===undefined)){$('predFb').innerHTML='<div class="fb bad">Responda todos os algoritmos primeiro.</div>';return}let acertos=0;const linhas=chaves.map(a=>{const r=simular(a),ok=!r.falha;if(ok===previsao[a])acertos++const cb=$('ruleP');cb.checked=!cb.checked;const alt=simular(a);cb.checked=!cb.checkedconst nota=(!!alt.falha!==!!r.falha)?`<br><span class="pill req">Com a Regra 4 ${cb.checked?'desligada':'ligada'}: ${alt.falha?'Falha':'Funciona'}</span>:''return `${ALGORITMOS[a]}: ${veredito(r,a)} (você disse ${previsao[a]?'funciona':'falha'})${nota}`})const todos=acertos===chaves.lengthif(todos){pontuacao+=10*chaves.length;sequencia++}else{sequencia=0;pontuacao+=10*acertos}$('predFb').innerHTML=`<div class="fb ${todos?'ok':'bad'}">${acertos}/${chaves.length} corretos</div><div class="hint" style="font-size:13px">${linhas.join('<br>')}</div>`;atualizarPontuacao()}
+function atualizarPontuacao(){$('score').textContent=pontuacao;$('streak').textContent=sequencia}
+/* ---------- desenho ---------- */
+function renderizarFerramentas(){let h=tarefas.map((t,i)=>`<div class="tool ${ferramenta===i?'sel':''}" style="background:${CORES[i%8]}" onclick="ferramenta=${i};renderizarFerramentas()">T${i+1}</div>`).join('')h+=`<div class="tool ${ferramenta===-1?'sel':''}" style="background:#6b4a30;color:#fbefc4" onclick="ferramenta=-1;renderizarFerramentas()">OCIOSO</div>`$('tools').innerHTML=h}
+function renderizarGrade(){$('grid').innerHTML=slots.map((v,i)=>{const cls=v===null?'empty':v===-1?'idle':'',st=v>=0&&v!==null?`style="background:${CORES[v%8]}"`:''return`<div class="slot ${cls} ${i%10===9?'m10':''}" ${st} data-i="${i}" title="t=${i}">${v===null?i:v===-1?'.':'T'+(v+1)}</div>`}).join('')}
+function limparDesenho(){slots=new Array(H).fill(null);renderizarGrade();$('drawFb').innerHTML=''}
+function pintar(el){const s=el&&el.closest&&el.closest('.slot');if(!s)return;const i=+s.dataset.i;if(slots[i]!==ferramenta){slots[i]=ferramenta;renderizarGrade()}}
+$('grid').addEventListener('pointerdown',e=>{pintando=true;pintar(e.target);e.preventDefault()})
+$('grid').addEventListener('pointermove',e=>{if(pintando)pintar(document.elementFromPoint(e.clientX,e.clientY))
+})
+window.addEventListener('pointerup',()=>pintando=false)
+function verificarDesenho(){const a=$('drawAlgo').value,r=simular(a),lim=r.slots.length;for(let i=0;i<lim;i++){const meu=slots[i]===null?-1:slots[i];if(meu!==r.slots[i]){sequencia=0;atualizarPontuacao()$('drawFb').innerHTML=`<div class="fb bad">Primeira diferença em t=${i}: esperado ${r.slots[i]<0?'OCIOSO':'TAREFA'+(r.slots[i]+1)}, você colocou ${meu<0?'OCIOSO':'TAREFA'+(meu+1)}.</div>`;return}}pontuacao+=20;sequencia++;atualizarPontuacao()$('drawFb').innerHTML=`<div class="fb ok">Escalonamento correto. ${r.falha?'O algoritmo falha: TAREFA'+(r.falha.task+1)+' perde o deadline em t='+r.falha.t+'.':'Nenhuma falha de deadline até t='+H+'.'}</div>'}
+/* ---------- jobs + verificação conceitual ---------- */
+function renderizarJobs(){const a=$('jobAlgo').value,r=simular(a),cnt={}let h='<table><tr><th>Job</th><th>Liberação</th><th>D relativo</th><th>D absoluto</th><th>Término</th><th>Resposta</th><th>Folga</th><th>Status</th></tr>r.jobs.slice().sort((x,y)=>x.rel-y.rel||x.i-y.i).slice(0,60).forEach(j=>{cnt[j.i]=(cnt[j.i]||0)+1;const rel=D(j.i,a)const feito=j.fim!==undefined,cumprido=feito&&j.fim<=j.absconst st=cumprido?'<span class="verdict-ok">Cumprido</span>':(r.falha&&j.abs<=r.falha.t&&!feito?'<span class="verdict-bad">Perdido</span>':(feito?'<span class="verdict-bad">Atrasado</span>':'<span class="pill">pendente</span>'))h+=`<tr><td style="color:${CORES[j.i%8]};font-weight:bold">T${j.i+1}.${cnt[j.i]}</td><td>${j.rel}</td><td>${rel}</td><td><b>${j.abs}</b></td><td>${feito?j.fim:'-'}</td><td>${feito?j.fim-j.rel:'-'}</td><td>${feito?j.abs-j.fim:'-'}</td><td>${st}</td></tr>`})$('jobs').innerHTML=h+'</table><div class="hint">Mostrando os primeiros 60 jobs liberados antes da simulação parar. Folga = deadline absoluto menos instante de término.</div>'}
+let dq = null
+function novaDQ(){const n=tarefas.length,type=n<2?0:rnd(0,2)$('dqFb').innerHTML=''const dd=i=>tarefas[i].d||tarefas[i].pif(type===0){const i=rnd(0,n-1),k=rnd(0,3),t=tarefas[i]dq={num:true,ans:k*t.p+dd(i),txt:`TAREFA${i+1} tem período ${t.p} e deadline relativo ${dd(i)}. Qual é o deadline absoluto do job liberado em t=${k*t.p}?`}}else if(type===1){let i,j,ai,aj,tent=0do{i=rnd(0,n-1);j=rnd(0,n-1);ai=rnd(0,2)*tarefas[i].p+dd(i);aj=rnd(0,2)*tarefas[j].p+dd(j);tent++;}while((i===j||ai===aj)&&tent<50)if(i===j||ai===aj){dq=null;return novaDQ2()}dq={opts:[['TAREFA'+(i+1),i],['TAREFA'+(j+1),j]],ans:ai<aj?i:j,txt:`Ambos os jobs estão prontos agora. TAREFA${i+1} tem deadline absoluto ${ai} e TAREFA${j+1} tem ${aj}. Qual o EDF executa primeiro?`}}else{let i,j,tent=0do{i=rnd(0,n-1);j=rnd(0,n-1);tent++;}while((i===j||tarefas[i].p===tarefas[j].p)&&tent<50)if(i===j||tarefas[i].p===tarefas[j].p){return novaDQ2()}dq={opts:[['TAREFA'+(i+1),i],['TAREFA'+(j+1),j]],ans:tarefas[i].p<tarefas[j].p?i:j,txt:`No Rate Monotonic, qual tem prioridade maior: TAREFA${i+1} (período ${tarefas[i].p}) ou TAREFA${j+1} (período ${tarefas[j].p})?`}}renderizarDQ()}function novaDQ2(){const t=tarefas[0];dq={num:true,ans:t.d||t.p,txt:`TAREFA1 tem período ${t.p}. Qual é o deadline absoluto do job liberado em t=0?`};renderizarDQ()}function renderizarDQ(){$('dq').innerHTML=`<div style="margin-bottom:8px">${dq.txt}</div>`+(dq.num?`<div class="row"><input type="number" id="dqIn"><button class="btn" onclick="responderDQ(+$('dqIn').value)">Verificar</button></div>`:`<div class="row">${dq.opts.map(o=>`<button class="btn alt" onclick="responderDQ(${o[1]})">${o[0]}</button>`).join('')}</div>`)}function responderDQ(v){const ok=v===dq.ansif(ok){pontuacao+=5;sequencia++}else sequencia=0;atualizarPontuacao()$('dqFb').innerHTML=`<div class="fb ${ok?'ok':'bad'}">${ok?'Correto.':'Não exatamente. Resposta: '+(dq.num?dq.ans:'TAREFA'+(dq.ans+1))+'.'}</div><div class="row" style="margin-top:8px"><button class="btn alt" onclick="novaDQ()">Próxima questão</button></div>`}
+/* ---------- controle ---------- */
+function carregarPreset(i){const p=PRESETS[i];tarefas=p.tarefas.map(([p_,d,c,pr])=>({p:p_,d,c,pr}));H=p.H;req=p.algos; $('H').value=H$('preset').value=i;atualizar(true)}function questaoAleatoria(){const n=rnd(3,4),pool=[8,10,12,15,16,18,20,21,24,30],ps=[]while(ps.length<n){const v=pool[rnd(0,pool.length-1)];if(!ps.includes(v))ps.push(v)}ps.sort((a,b)=>a-b)tarefas=ps.map((p,i)=>{const c=rnd(1,Math.max(1,Math.floor(p*0.3)))const d=Math.random()<.5?null:rnd(Math.min(p,c+2),p){p,d,c,pr:i+1})})req=['RM','EDF','DM'];H=80$('H').value=H$('preset').selectedIndex=-1const validation=validateTaskSet(tarefas)if(!validation.valid){$('dqFb').innerHTML='<div class="fb bad">Conjunto de tarefas gerado tem utilização muito alta. Regenerando...</div>;setTimeout(()=>{questaoAleativa()},500);return}atualizar(true)}function atualizar(reset){if(reset){previsao={};ferramenta=0;solAberta=false;$('predFb').innerHTML=''}renderizarChart();renderizarAnatomia();renderizarPrevisao();renderizarFerramentas();renderizarSolucao();renderizarJobs();if(reset||!dq)novaDQ()if(reset||slots.length!==H)limparDesenho()else renderizarGrade()}
+$('preset').innerHTML=PRESETS.map((p,i)=>`<option value="${i}">${p.t}</option>`).join('')$('drawAlgo').innerHTML=Object.keys(ALGORITMOS).map(a=>`<option value="${a}">${ALGORITMOS[a]}</option>`).join('')$('jobAlgo').innerHTML=Object.keys(ALGORITMOS).map(a=>`<option value="${a}">${ALGORITMOS[a]}</option>`).join('')carregarPreset(1)
+</script>
+</body>
+</html>
