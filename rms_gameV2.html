@@ -70,7 +70,7 @@ td{padding:5px 4px;border-top:1px solid var(--line)}
     <div><b id="best">0</b><span>Recorde</span></div>
   </div>
 
-  <div class="card">
+    <div class="card">
     <div class="row" style="justify-content:space-between; margin-bottom:10px;">
       <div>
         <label class="k" for="preset">Preset / Nível:</label>
@@ -80,7 +80,9 @@ td{padding:5px 4px;border-top:1px solid var(--line)}
         <label class="k" for="H">Horizonte (H):</label>
         <input type="number" id="H" value="80" min="10" max="200" style="width:80px" onchange="definirH()">
       </div>
-      <div style="align-self:flex-end">
+      <div class="row" style="align-self:flex-end">
+        <button onclick="adicionarTarefa()">+ Tarefa</button>
+        <button onclick="removerTarefa()">- Tarefa</button>
         <button class="p" onclick="questaoAleatoria()">Gerar Aleatório</button>
       </div>
     </div>
@@ -89,8 +91,6 @@ td{padding:5px 4px;border-top:1px solid var(--line)}
       <table id="chart"></table>
     </div>
     <div class="row" style="margin-top:10px">
-      <button onclick="adicionarTarefa()">+ Tarefa</button>
-      <button onclick="removerTarefa()">- Tarefa</button>
       <button onclick="validarTarefaSet()">Validar Conjunto (U & LL)</button>
     </div>
     <div id="predFb"></div>
@@ -176,7 +176,7 @@ const PRESETS=[
   {t:'Nível: Alien', H:150, algos:['RM','EDF','DM'], tarefas:[{p:7,d:null,c:2,pr:1},{p:11,d:null,c:3,pr:2},{p:17,d:null,c:4,pr:3},{p:23,d:null,c:6,pr:4}]}
 ];
 
-let tarefas=[], H=80, req=['RM'], pontuacao=0, sequencia=0, melhor=0, previsao={}, ferramenta=0, slots=[], pintando=false, solAberta=false, dq=null;
+let tarefas=[], H=80, req=['RM'], pontuacao=0, sequencia=0, melhor=0, previsao={}, ferramenta=0, slots=[], pintando=false, solAberta=false, dq=null, filtroAlgo={RM:'N',EDF:'N',DM:'N'};
 try{ melhor = +localStorage.getItem('rmsBest')||0; }catch(e){}
 $('best').textContent = melhor;
 
@@ -326,13 +326,25 @@ function mostrarSolucao(){
   renderizarSolucao();
 }
 
+function ciclarFiltro(a){
+  filtroAlgo[a]={N:'V',V:'F',F:'N'}[filtroAlgo[a]];
+  renderizarSolucao();
+}
+
 function renderizarSolucao(){
   if(!solAberta){ $('sol').innerHTML=''; return; }
-  $('sol').innerHTML=`<div class="hint" style="margin-top:10px">U = ${(utilizacao()*100).toFixed(1)}%</div>` +
+  const estilo={
+    N:'background:var(--panel2);color:var(--text)',
+    V:'background:var(--ok);border-color:var(--ok);color:#1d0e08',
+    F:'background:var(--bad);border-color:var(--bad);color:#fff'
+  };
+  const dica={N:'Filtro desativado',V:'Aleatório garante SEM falha',F:'Aleatório garante COM falha'};
+  $('sol').innerHTML=`<div class="hint" style="margin-top:10px">U = ${(utilizacao()*100).toFixed(1)}% &middot; Filtro do aleatório: N = off, V = sem falha, F = com falha</div>` +
     Object.keys(ALGORITMOS).map(a=>{
       const r=simular(a);
       const verdict=r.falha?`<span class="verdict-bad">Falha em t=${r.falha.t} (T${r.falha.task+1})</span>`:`<span class="verdict-ok">Sem falhas até t=${H}</span>`;
-      return `<div class="algo"><b>${ALGORITMOS[a]}</b><br>${verdict}${ganttSVG(r)}</div>`;
+      const f=filtroAlgo[a];
+      return `<div class="algo"><div class="row" style="justify-content:space-between"><b>${ALGORITMOS[a]}</b><button onclick="ciclarFiltro('${a}')" title="${dica[f]}" style="min-width:42px;padding:4px 10px;${estilo[f]}">${f}</button></div>${verdict}${ganttSVG(r)}</div>`;
     }).join('');
 }
 
@@ -478,17 +490,27 @@ function questaoAleatoria(){
   const idx=+$('preset').value||0;
   const nivel=idx>=3?idx-3:1;
   const cfg=[
-    {n:2,pool:[6,8,10,12,15,20],u:[.4,.7],h:60,dl:false},
-    {n:3,pool:[8,10,12,15,20,24],u:[.6,.85],h:80,dl:false},
-    {n:3,pool:[10,12,15,18,20,30],u:[.8,.95],h:100,dl:true},
-    {n:4,pool:[10,12,14,15,20,24,30,40],u:[.8,.98],h:120,dl:true},
-    {n:4,pool:[7,9,11,13,17,19,23],u:[.9,1],h:150,dl:true}
+    {pool:[6,8,10,12,15,20],u:[.4,.7],h:60,dl:false},
+    {pool:[8,10,12,15,20,24],u:[.6,.85],h:80,dl:false},
+    {pool:[10,12,15,18,20,30],u:[.8,.95],h:100,dl:true},
+    {pool:[10,12,14,15,20,24,30,40],u:[.8,.98],h:120,dl:true},
+    {pool:[7,9,11,13,17,19,23],u:[.9,1],h:150,dl:true}
   ][nivel];
-  let ts=[];
-  for(let tent=0; tent<500; tent++){
-    const ps=[...cfg.pool].sort(()=>Math.random()-0.5).slice(0,cfg.n).sort((a,b)=>a-b);
-    ts=ps.map((p,i)=>{
-      const c=rnd(1,Math.max(1,Math.floor(p*0.4)));
+  const n=Math.max(1,tarefas.length);
+  const chaves=Object.keys(ALGORITMOS);
+  const ativos=chaves.filter(a=>filtroAlgo[a]!=='N');
+  const temF=ativos.some(a=>filtroAlgo[a]==='F');
+  const uMin=cfg.u[0], uMax=temF?1.15:cfg.u[1];
+  H=cfg.h;
+  let melhorTs=null, melhorDist=Infinity, melhorOk=false;
+  for(let tent=0; tent<3000; tent++){
+    const ps=[...cfg.pool].sort(()=>Math.random()-0.5);
+    while(ps.length<n) ps.push(cfg.pool[rnd(0,cfg.pool.length-1)]);
+    ps.length=n;
+    ps.sort((a,b)=>a-b);
+    const ts=ps.map((p,i)=>{
+      const cMax=Math.max(1,Math.floor(p*Math.min(0.4,(uMax/n)*1.5)));
+      const c=rnd(1,cMax);
       let d=null;
       if(cfg.dl && Math.random()<0.6){
         const dv=rnd(Math.max(c,Math.ceil(p*0.6)),p);
@@ -497,11 +519,27 @@ function questaoAleatoria(){
       return {p,d,c,pr:i+1};
     });
     const u=ts.reduce((s,t)=>s+t.c/t.p,0);
-    if(u>=cfg.u[0] && u<=cfg.u[1]) break;
+    const dist=u<uMin?uMin-u:u>uMax?u-uMax:0;
+    let okFiltro=true;
+    if(ativos.length){
+      tarefas=ts;
+      okFiltro=ativos.every(a=>{
+        const falhou=!!simular(a).falha;
+        return filtroAlgo[a]==='F'?falhou:!falhou;
+      });
+    }
+    // candidatos que satisfazem os filtros têm prioridade sobre os que não satisfazem
+    if((okFiltro&&!melhorOk)||(okFiltro===melhorOk&&dist<melhorDist)){
+      melhorTs=ts; melhorDist=dist; melhorOk=okFiltro;
+    }
+    if(okFiltro&&dist===0) break;
   }
-  tarefas=ts;
-  H=cfg.h; $('H').value=H;
+  tarefas=melhorTs;
+  $('H').value=H;
   atualizar(true);
+  if(ativos.length&&!melhorOk){
+    $('predFb').innerHTML='<div class="fb bad">Não foi possível gerar uma questão que satisfaça todos os filtros V/F. Foi usada a mais próxima. Tente gerar de novo ou relaxe algum filtro.</div>';
+  }
 }
 
 function atualizar(reset=false){
