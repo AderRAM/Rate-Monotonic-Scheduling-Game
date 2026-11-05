@@ -163,7 +163,7 @@ const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 const lcm=(a,b)=>a/gcd(a,b)*b;
 const CORES=['#e63b2e','#f08a24','#7d8b2f','#c2417a','#8c5a2b','#3f8f8b','#4b69c9','#9b4bc9'];
-const ALGORITMOS={RM:'Rate Monotonic',EDF:'Earliest Deadline First',DM:'Deadline Monotonic'};
+const ALGORITMOS={RM:'Rate Monotonic',EDF:'Earliest Deadline First',DM:'Deadline Monotonic',PF:'Prioridade Fixa'};
 
 const PRESETS=[
   {t:'Questão 1', H:80, algos:['RM'], tarefas:[{p:50,d:null,c:15,pr:3},{p:40,d:null,c:10,pr:2},{p:30,d:null,c:10,pr:1}]},
@@ -176,7 +176,8 @@ const PRESETS=[
   {t:'Nível: Alien', H:150, algos:['RM','EDF','DM'], tarefas:[{p:7,d:null,c:2,pr:1},{p:11,d:null,c:3,pr:2},{p:17,d:null,c:4,pr:3},{p:23,d:null,c:6,pr:4}]}
 ];
 
-let tarefas=[], H=80, req=['RM'], pontuacao=0, sequencia=0, melhor=0, previsao={}, ferramenta=0, slots=[], pintando=false, solAberta=false, dq=null, filtroAlgo={RM:'N',EDF:'N',DM:'N'};
+let tarefas=[], H=80, req=['RM'], pontuacao=0, sequencia=0, melhor=0, previsao={}, ferramenta=0, slots=[], pintando=false, solAberta=false, dq=null, filtroAlgo={RM:'N',EDF:'N',DM:'N',PF:'N'}, abaAtual='sim';
+const ABAS=['sim','pred','des','jobs','quiz'];
 try{ melhor = +localStorage.getItem('rmsBest')||0; }catch(e){}
 $('best').textContent = melhor;
 
@@ -216,6 +217,7 @@ function D(i,algo){
 function rank(algo){
   const idx=tarefas.map((_,i)=>i);
   if(algo==='DM') idx.sort((a,b)=>D(a,'DM')-D(b,'DM')||a-b);
+  else if(algo==='PF') idx.sort((a,b)=>tarefas[a].pr-tarefas[b].pr||a-b);
   else idx.sort((a,b)=>tarefas[a].p-tarefas[b].p||a-b);
   const r=[]; idx.forEach((i,k)=>r[i]=k);
   return r;
@@ -250,13 +252,14 @@ function simular(algo){
 function utilizacao(){return tarefas.reduce((s,t)=>s+t.c/t.p,0)}
 
 function renderizarChart(){
-  let h='<tr><th>Tarefa</th><th>Período (P)</th><th>Deadline (D)</th><th>Comp (C)</th></tr>';
+  let h='<tr><th>Tarefa</th><th>Período (P)</th><th>Deadline (D)</th><th>Comp (C)</th><th>Prioridade (1 = maior)</th></tr>';
   tarefas.forEach((t,i)=>{
     h+=`<tr>
       <td style="color:${CORES[i%8]};font-weight:bold">T${i+1}</td>
       <td><input type="number" min="1" value="${t.p}" onchange="editar(${i},'p',this.value)"></td>
       <td><input type="number" min="1" value="${t.d??''}" placeholder="=P" onchange="editar(${i},'d',this.value)"></td>
       <td><input type="number" min="1" value="${t.c}" onchange="editar(${i},'c',this.value)"></td>
+      <td><input type="number" value="${t.pr}" onchange="editar(${i},'pr',this.value)"></td>
     </tr>`;
   });
   $('chart').innerHTML=h;
@@ -266,6 +269,7 @@ function editar(i,k,v){
   const n=Math.round(+v);
   if(k==='p'||k==='c') tarefas[i][k]=isNaN(n)?1:Math.max(1,n);
   else if(k==='d') tarefas[i][k]=(v===''||isNaN(n))?null:Math.max(1,n);
+  else if(k==='pr') tarefas[i].pr=(v===''||isNaN(n))?i+1:n;
   atualizar();
 }
 
@@ -397,7 +401,7 @@ function pintar(el){
   const s=el&&el.closest&&el.closest('.slot');
   if(!s) return;
   const i=+s.dataset.i;
-  if(slots[i]!==ferramenta){ slots[i]=ferramenta; renderizarGrade(); }
+  if(slots[i]!==ferramenta){ slots[i]=ferramenta; renderizarGrade(); salvarEstado(); }
 }
 
 $('grid').addEventListener('pointerdown',e=>{pintando=true;try{e.target.releasePointerCapture(e.pointerId);}catch(_){}pintar(e.target);e.preventDefault();});
@@ -508,6 +512,8 @@ function questaoAleatoria(){
     while(ps.length<n) ps.push(cfg.pool[rnd(0,cfg.pool.length-1)]);
     ps.length=n;
     ps.sort((a,b)=>a-b);
+    const prs=Array.from({length:n},(_,i)=>i+1);
+    if(Math.random()<0.5) prs.sort(()=>Math.random()-0.5);
     const ts=ps.map((p,i)=>{
       const cMax=Math.max(1,Math.floor(p*Math.min(0.4,(uMax/n)*1.5)));
       const c=rnd(1,cMax);
@@ -516,7 +522,7 @@ function questaoAleatoria(){
         const dv=rnd(Math.max(c,Math.ceil(p*0.6)),p);
         d=dv<p?dv:null;
       }
-      return {p,d,c,pr:i+1};
+      return {p,d,c,pr:prs[i]};
     });
     const u=ts.reduce((s,t)=>s+t.c/t.p,0);
     const dist=u<uMin?uMin-u:u>uMax?u-uMax:0;
@@ -552,20 +558,67 @@ function atualizar(reset=false){
   renderizarJobs();
   if(solAberta) renderizarSolucao();
   if(reset) novaDQ();
+  salvarEstado();
 }
 
 function mudarAba(aba){
+  abaAtual=aba;
   document.querySelectorAll('.tab-pane').forEach(el=>el.style.display='none');
   document.querySelectorAll('.tabs button').forEach(el=>el.classList.remove('on'));
   $(`aba-${aba}`).style.display='block';
-  event.target.classList.add('on');
+  const btn=document.querySelectorAll('.tabs button')[ABAS.indexOf(aba)];
+  if(btn) btn.classList.add('on');
+  salvarEstado();
 }
+
+function salvarEstado(){
+  try{
+    localStorage.setItem('rmsEstado',JSON.stringify({
+      tarefas,H,req,preset:$('preset').value,filtroAlgo,pontuacao,sequencia,previsao,
+      solAberta,aba:abaAtual,slots,ferramenta,
+      drawAlgo:$('drawAlgo').value,jobAlgo:$('jobAlgo').value
+    }));
+  }catch(e){}
+}
+
+function restaurarEstado(){
+  try{
+    const s=JSON.parse(localStorage.getItem('rmsEstado')||'null');
+    if(!s||!Array.isArray(s.tarefas)||!s.tarefas.length) return false;
+    tarefas=s.tarefas.map((t,i)=>({
+      p:Math.max(1,Math.round(+t.p)||1),
+      d:t.d?Math.max(1,Math.round(+t.d)):null,
+      c:Math.max(1,Math.round(+t.c)||1),
+      pr:Number.isFinite(+t.pr)?Math.round(+t.pr):i+1
+    }));
+    H=Math.max(10,Math.min(200,+s.H||80));
+    req=s.req||['RM'];
+    Object.assign(filtroAlgo,s.filtroAlgo||{});
+    pontuacao=+s.pontuacao||0; sequencia=+s.sequencia||0;
+    previsao=s.previsao||{};
+    solAberta=!!s.solAberta;
+    ferramenta=(s.ferramenta>=-1&&s.ferramenta<tarefas.length)?s.ferramenta:0;
+    $('H').value=H;
+    if(PRESETS[s.preset]) $('preset').value=s.preset;
+    if(ALGORITMOS[s.drawAlgo]) $('drawAlgo').value=s.drawAlgo;
+    if(ALGORITMOS[s.jobAlgo]) $('jobAlgo').value=s.jobAlgo;
+    atualizar(true);
+    if(Array.isArray(s.slots)&&s.slots.length===H){ slots=s.slots; renderizarGrade(); }
+    $('score').textContent=pontuacao; $('streak').textContent=sequencia;
+    mudarAba(ABAS.includes(s.aba)?s.aba:'sim');
+    return true;
+  }catch(e){ return false; }
+}
+
+window.addEventListener('beforeunload',salvarEstado);
+window.addEventListener('pagehide',salvarEstado);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') salvarEstado(); });
 
 // Inicialização
 $('drawAlgo').innerHTML=Object.keys(ALGORITMOS).map(a=>`<option value="${a}">${ALGORITMOS[a]}</option>`).join('');
 $('jobAlgo').innerHTML=Object.keys(ALGORITMOS).map(a=>`<option value="${a}">${ALGORITMOS[a]}</option>`).join('');
 $('preset').innerHTML=PRESETS.map((p,i)=>`<option value="${i}">${p.t}</option>`).join('');
-carregarPreset(0);
+if(!restaurarEstado()) carregarPreset(0);
 </script>
 </body>
 </html>
