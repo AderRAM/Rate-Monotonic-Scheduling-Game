@@ -10,7 +10,8 @@
 :root{
   --bg:#1d0e08; --panel:#2c1810; --panel2:#3a2214; --line:#5a3520;
   --red:#ff3b2f; --orange:#ff9d3d; --cream:#fbefc4; --olive:#a8b04a; --muted:#c9a882; --gold:#e0b040;
-  --ok:#a8b04a; --bad:#ff3b2f; --text:#fbefc4; --card:#2c1810; --acc:#ff5a36;--img:url("/Rate-Monotonic-Scheduling-Game/Astronaut.png")
+  --ok:#a8b04a; --bad:#ff3b2f; --text:#fbefc4; --card:#2c1810; --acc:#ff5a36;
+  --idle:#4a2a1e; --emp:#2a120c;
   color-scheme:dark;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -22,25 +23,23 @@ body{margin:0;padding:14px;background:var(--bg);color:var(--text);font-family:sy
 .hero h1{margin:0;font-size:1.5rem;color:var(--text)}
 .hero p{margin:0;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.k{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
 .stats{display:flex;justify-content:space-around;text-align:center;gap:6px}
 .stats b{display:block;font-size:1.3rem}.stats span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
 button,select,input{font:inherit;font-weight:600;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text);cursor:pointer}
 input{width:100%;text-align:center}
-.tabs button{flex:1;min-width:110px}.tabs button.on,button.p{background:var(--acc);border-color:var(--acc);color:#fff}
+.tabs button{flex:1;min-width:110px}.tabs button.on,button.p,.algo button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 button:disabled{opacity:.4;cursor:default}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .row.c{justify-content:center}
 table{width:100%;border-collapse:collapse;font-size:.92rem}
 th{font-size:.72rem;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px}
 td{padding:5px 4px;border-top:1px solid var(--line)}
-.met{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0 6px;font-weight:700;font-size:.9rem}
-.v{padding:8px 12px;border-radius:10px;font-weight:600;font-size:.9rem;border:1px solid}
-.v.ok{color:var(--ok)}.v.bad{color:var(--bad)}.v.mid{color:var(--gold)}
-.grid-container{display:grid;grid-template-columns:repeat(auto-fill, minmax(28px, 1fr));gap:3px;padding:4px 0 8px}
+.grid-container{display:grid;grid-template-columns:repeat(auto-fill, minmax(28px, 1fr));gap:3px;padding:4px 0 8px;touch-action:none}
 .slot{height:38px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.72rem;border:2px solid transparent;cursor:pointer;user-select:none}
-.slot.idle{background:#4a2a1e;color:var(--muted)}
-.slot.empty{background:#2a120c;border:2px dashed var(--line)}
+.slot.idle{background:var(--idle);color:var(--muted)}
+.slot.empty{background:var(--emp);border:2px dashed var(--line)}
 .slot.m10{border-right:2px solid var(--gold)}
 .tools-pal{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
 .tool{padding:6px 12px;border-radius:8px;font-weight:800;cursor:pointer;border:2px solid var(--line);color:#fff}
@@ -54,6 +53,7 @@ td{padding:5px 4px;border-top:1px solid var(--line)}
 .algo{background:var(--panel);border:1px solid var(--line);padding:10px;border-radius:10px;margin-top:8px}
 .verdict-ok{color:var(--ok);font-weight:bold}
 .verdict-bad{color:var(--bad);font-weight:bold}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:10px}
 </style>
 </head>
 <body>
@@ -64,14 +64,15 @@ td{padding:5px 4px;border-top:1px solid var(--line)}
   </div>
 
   <div class="card stats">
-    <div><span id="score">0</span><span> Pontos</span></div>
-    <div><span id="streak">0</span><span> Sequências</span></div>
+    <div><b id="score">0</b><span>Pontos</span></div>
+    <div><b id="streak">0</b><span>Sequência</span></div>
+    <div><b id="best">0</b><span>Recorde</span></div>
   </div>
 
   <div class="card">
     <div class="row" style="justify-content:space-between; margin-bottom:10px;">
       <div>
-        <label class="k" for="preset">Preset:</label>
+        <label class="k" for="preset">Preset / Nível:</label>
         <select id="preset" onchange="carregarPreset(this.value)"></select>
       </div>
       <div>
@@ -98,7 +99,8 @@ td{padding:5px 4px;border-top:1px solid var(--line)}
     <button class="on" onclick="mudarAba('sim')">1. Simulação</button>
     <button onclick="mudarAba('pred')">2. Previsão</button>
     <button onclick="mudarAba('des')">3. Desenho Manual</button>
-    <button onclick="mudarAba('Tasks')">4. Tabela de Tasks</button>
+    <button onclick="mudarAba('jobs')">4. Tabela de Jobs</button>
+    <button onclick="mudarAba('quiz')">5. Quiz Conceitual</button>
   </div>
 
   <!-- ABA 1: SIMULAÇÃO / ANATOMIA -->
@@ -134,18 +136,28 @@ td{padding:5px 4px;border-top:1px solid var(--line)}
     <div id="drawFb"></div>
   </div>
 
-  <!-- ABA 4: Tasks -->
-  <div class="card tab-pane" id="aba-Tasks" style="display:none">
-    <div class="k">Inspeção Detalhada de Tasks</div>
+  <!-- ABA 4: JOBS -->
+  <div class="card tab-pane" id="aba-jobs" style="display:none">
+    <div class="k">Inspeção Detalhada de Jobs</div>
     <div class="row">
       <label for="jobAlgo">Algoritmo:</label>
-      <select id="jobAlgo" onchange="renderizarTasks()"></select>
+      <select id="jobAlgo" onchange="renderizarJobs()"></select>
     </div>
-    <div style="overflow-x:auto; margin-top:10px" id="Tasks"></div>
+    <div style="overflow-x:auto; margin-top:10px" id="jobs"></div>
+  </div>
+
+  <!-- ABA 5: QUIZ CONCEITUAL -->
+  <div class="card tab-pane" id="aba-quiz" style="display:none">
+    <div class="k">Desafio Rápido de Conceitos</div>
+    <div id="dqBox" style="font-size:1rem; font-weight:600; margin-bottom:10px;"></div>
+    <div id="dqOpts" class="opts"></div>
+    <div id="dqFb"></div>
+    <button class="p" style="margin-top:15px" onclick="novaDQ()">Próxima Pergunta</button>
   </div>
 </div>
 
 <script>
+const $=id=>document.getElementById(id);
 const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 const lcm=(a,b)=>a/gcd(a,b)*b;
@@ -153,12 +165,19 @@ const CORES=['#e63b2e','#f08a24','#7d8b2f','#c2417a','#8c5a2b','#3f8f8b','#4b69c
 const ALGORITMOS={RM:'Rate Monotonic',EDF:'Earliest Deadline First',DM:'Deadline Monotonic'};
 
 const PRESETS=[
-  {t:'Questão Básica',H:60,algos:['RM'],tarefas:[{p:10,d:null,c:2,pr:1},{p:20,d:null,c:5,pr:2}]},
-  {t:'Questão Padrão',H:80,algos:['RM','EDF','DM'],tarefas:[{p:20,d:null,c:3,pr:1},{p:15,d:null,c:3,pr:2},{p:10,d:null,c:4,pr:3}]}
+  {t:'Questão 1', H:80, algos:['RM'], tarefas:[{p:50,d:null,c:15,pr:3},{p:40,d:null,c:10,pr:2},{p:30,d:null,c:10,pr:1}]},
+  {t:'Questão 2', H:80, algos:['RM','EDF','DM'], tarefas:[{p:20,d:5,c:3,pr:1},{p:15,d:7,c:3,pr:2},{p:10,d:10,c:4,pr:3},{p:20,d:20,c:2,pr:4}]},
+  {t:'Questão 3', H:80, algos:['RM','EDF','DM'], tarefas:[{p:20,d:15,c:3,pr:1},{p:15,d:17,c:3,pr:2},{p:10,d:11,c:4,pr:3},{p:20,d:20,c:2,pr:4}]},
+  {t:'Nível: Easy', H:60, algos:['RM'], tarefas:[{p:10,d:null,c:2,pr:1},{p:20,d:null,c:5,pr:2}]},
+  {t:'Nível: Normal', H:80, algos:['RM','EDF'], tarefas:[{p:20,d:null,c:3,pr:1},{p:15,d:null,c:3,pr:2},{p:10,d:null,c:4,pr:3}]},
+  {t:'Nível: Hard', H:100, algos:['RM','EDF','DM'], tarefas:[{p:12,d:null,c:2,pr:1},{p:18,d:null,c:4,pr:2},{p:30,d:null,c:7,pr:3}]},
+  {t:'Nível: Expert', H:120, algos:['RM','EDF','DM'], tarefas:[{p:10,d:null,c:3,pr:1},{p:14,d:null,c:3,pr:2},{p:20,d:null,c:5,pr:3},{p:40,d:null,c:8,pr:4}]},
+  {t:'Nível: Alien', H:150, algos:['RM','EDF','DM'], tarefas:[{p:7,d:null,c:2,pr:1},{p:11,d:null,c:3,pr:2},{p:17,d:null,c:4,pr:3},{p:23,d:null,c:6,pr:4}]}
 ];
 
-let tarefas=[], H=80, req=['RM'], pontuacao=0, sequencia=0, previsao={}, ferramenta=0, slots=[], pintando=false, solAberta=false;
-const $=id=>document.getElementById(id);
+let tarefas=[], H=80, req=['RM'], pontuacao=0, sequencia=0, melhor=0, previsao={}, ferramenta=0, slots=[], pintando=false, solAberta=false, dq=null;
+try{ melhor = +localStorage.getItem('rmsBest')||0; }catch(e){}
+$('best').textContent = melhor;
 
 function llBound(n){return n*(Math.pow(2,1/n)-1)}
 
@@ -168,7 +187,7 @@ function rmsSimulate(ts, horizon){
     ts.forEach((k,i)=>{if(t%k.p===0){if(rem[i]>0)miss.push({i,t});rem[i]=k.c}});
     const ready=ts.map((k,i)=>({i, rem:rem[i]})).filter(k=>k.rem>0);
     if(ready.length){
-      ready.sort((a,b)=>a.i-b.i); // fallback priority
+      ready.sort((a,b)=>ts[a.i].p-ts[b.i].p||a.i-b.i);
       const r=ready[0];
       rem[r.i]--;
       slots.push(r.i);
@@ -176,7 +195,7 @@ function rmsSimulate(ts, horizon){
       slots.push(-1);
     }
   }
-  ts.forEach((k,i)=>{if(rem[i]>0)miss.push({i,t:horizon})});
+  ts.forEach((k,i)=>{if(rem[i]>0 && horizon%k.p===0)miss.push({i,t:horizon})});
   return {slots, miss};
 }
 
@@ -190,7 +209,7 @@ function validateTaskSet(ts){
 function D(i,algo){
   const t=tarefas[i];
   const base=t.d||t.p;
-  return algo==='DM'?base:t.p;
+  return base;
 }
 
 function rank(algo){
@@ -202,15 +221,15 @@ function rank(algo){
 }
 
 function simular(algo){
-  const Tasks=[], r=rank(algo);
+  const jobs=[], r=rank(algo);
   let falha=null, ultimo=-1;
   const out=[];
   for(let t=0; t<=H; t++){
-    for(const j of Tasks) if(j.rem>0 && j.abs<=t && !falha) falha={t:j.abs, task:j.i};
+    for(const j of jobs) if(j.rem>0 && j.abs<=t && !falha) falha={t:j.abs, task:j.i};
     if(falha || t===H) break;
 
-    tarefas.forEach((tk,i)=>{if(t%tk.p===0) Tasks.push({i, rem:tk.c, rel:t, abs:t+(tk.d||tk.p)})});
-    const ativos=Tasks.filter(j=>j.rem>0);
+    tarefas.forEach((tk,i)=>{if(t%tk.p===0) jobs.push({i, rem:tk.c, rel:t, abs:t+(tk.d||tk.p)})});
+    const ativos=jobs.filter(j=>j.rem>0);
     let escolhido=null;
     if(ativos.length){
       ativos.sort((a,b)=>{
@@ -224,7 +243,7 @@ function simular(algo){
     ultimo=escolhido?escolhido.i:-1;
     out.push(ultimo);
   }
-  return {slots:out, falha, Tasks};
+  return {slots:out, falha, jobs};
 }
 
 function utilizacao(){return tarefas.reduce((s,t)=>s+t.c/t.p,0)}
@@ -257,6 +276,7 @@ function adicionarTarefa(){
 
 function removerTarefa(){
   if(tarefas.length>1) tarefas.pop();
+  if(ferramenta>=tarefas.length) ferramenta=0;
   atualizar();
 }
 
@@ -267,14 +287,14 @@ function definirH(){
 
 function validarTarefaSet(){
   const res=validateTaskSet(tarefas);
-  const fbClass=res.utilization<=parseFloat(res.bound)?'ok':'bad';
+  const fbClass=res.valid?'ok':'bad';
   $('predFb').innerHTML=`<div class="fb ${fbClass}">Utilização U=${res.utilization}% (Bound LL=${res.bound}%). ${res.valid?'Conjunto viável na teoria.':'Atenção: Risco de estouro de deadline.'}</div>`;
 }
 
 function renderizarAnatomia(){
   const W=Math.min(H, Math.max(...tarefas.map(t=>t.p))*2+10), u=14, L=50, rh=32;
   let s=`<svg width="${W*u+L+10}" height="${tarefas.length*rh+25}" viewBox="0 0 ${W*u+L+10} ${tarefas.length*rh+25}">`;
-  for(let t=0; t<=W; t+=5) s+=`<line x1="${L+t*u}" y1="2" x2="${L+t*u}" y2="${tarefas.length*rh}" stroke="#5a3520" stroke-width="1"/><text x="${L+t*u}" y="${tarefas.length*rh+15}" fill="var(--muted)" font-size="9" text-anchor="middle">${t}</text>`;
+  for(let t=0; t<=W; t+=5) s+=`<line x1="${L+t*u}" y1="2" x2="${L+t*u}" y2="${tarefas.length*rh}" stroke="#5a3520" stroke-width="1"/><text x="${L+t*u}" y="${tarefas.length*rh+15}" fill="#c9a882" font-size="9" text-anchor="middle">${t}</text>`;
   tarefas.forEach((t,i)=>{
     const y=i*rh+4, c=CORES[i%8];
     s+=`<text x="2" y="${y+16}" fill="${c}" font-size="11" font-weight="bold">T${i+1}</text>`;
@@ -289,14 +309,14 @@ function renderizarAnatomia(){
 
 function ganttSVG(res){
   const u=12, L=35, rh=24, len=H;
-  let s=`<svg width="${len*u+L+10}" height="35" style="margin-top:8px">`;
+  let s=`<div style="overflow-x:auto"><svg width="${len*u+L+10}" height="35" style="margin-top:8px">`;
   res.slots.forEach((v,x)=>{
     if(v>=0) s+=`<rect x="${L+x*u}" y="4" width="${u-1}" height="16" rx="2" fill="${CORES[v%8]}"/>`;
     else s+=`<rect x="${L+x*u}" y="4" width="${u-1}" height="16" rx="2" fill="#4a2a1e"/>`;
   });
-  for(let t=0; t<=len; t+=10) s+=`<text x="${L+t*u}" y="30" fill="var(--muted)" font-size="9" text-anchor="middle">${t}</text>`;
+  for(let t=0; t<=len; t+=10) s+=`<text x="${L+t*u}" y="30" fill="#c9a882" font-size="9" text-anchor="middle">${t}</text>`;
   if(res.falha) s+=`<line x1="${L+res.falha.t*u}" y1="0" x2="${L+res.falha.t*u}" y2="30" stroke="#ff3b2f" stroke-width="2"/>`;
-  s+='</svg>';
+  s+='</svg></div>';
   return s;
 }
 
@@ -336,7 +356,8 @@ function revelarPrevisao(){
   chaves.forEach(a=>{ if((!simular(a).falha)===previsao[a]) acertos++; });
   const ok=acertos===chaves.length;
   pontuacao+=ok?20:5; sequencia=ok?sequencia+1:0;
-  $('score').textContent=pontuacao; $('streak').textContent=sequencia;
+  if(pontuacao > melhor){ melhor = pontuacao; try{localStorage.setItem('rmsBest', melhor);}catch(e){} }
+  $('score').textContent=pontuacao; $('streak').textContent=sequencia; $('best').textContent=melhor;
   $('predFb').innerHTML=`<div class="fb ${ok?'ok':'bad'}">${acertos}/${chaves.length} corretos!</div>`;
 }
 
@@ -348,7 +369,7 @@ function renderizarFerramentas(){
 
 function renderizarGrade(){
   $('grid').innerHTML=slots.map((v,i)=>{
-    const cls=v===null?'empty':v===-1?'idle':'', st=v>=0?`style="background:${CORES[v%8]}"`:'';
+    const cls=v===null?'empty':v===-1?'idle':'', st=(v!==null&&v>=0)?`style="background:${CORES[v%8]}"`:'';
     return `<div class="slot ${cls} ${i%10===9?'m10':''}" ${st} data-i="${i}" title="t=${i}">${v===null?'·':v===-1?'Ø':'T'+(v+1)}</div>`;
   }).join('');
 }
@@ -366,30 +387,82 @@ function pintar(el){
   if(slots[i]!==ferramenta){ slots[i]=ferramenta; renderizarGrade(); }
 }
 
-$('grid').addEventListener('pointerdown',e=>{pintando=true;pintar(e.target);e.preventDefault();});
+$('grid').addEventListener('pointerdown',e=>{pintando=true;try{e.target.releasePointerCapture(e.pointerId);}catch(_){}pintar(e.target);e.preventDefault();});
 $('grid').addEventListener('pointermove',e=>{if(pintando)pintar(document.elementFromPoint(e.clientX,e.clientY));});
 window.addEventListener('pointerup',()=>pintando=false);
 
 function verificarDesenho(){
-  const a=$('drawAlgo').value, r=simular(a);
-  for(let i=0; i<H; i++){
+  const a=$('drawAlgo').value, r=simular(a), lim=r.slots.length;
+  for(let i=0; i<lim; i++){
     const meu=slots[i]===null?-1:slots[i];
     if(meu!==r.slots[i]){
       $('drawFb').innerHTML=`<div class="fb bad">Diferença em t=${i}: Esperado ${r.slots[i]===-1?'OCIOSO':'T'+(r.slots[i]+1)}, colocado ${meu===-1?'OCIOSO':'T'+(meu+1)}.</div>`;
       return;
     }
   }
-  $('drawFb').innerHTML=`<div class="fb ok">Parabéns! Escalonamento correto até t=${H}.</div>`;
+  $('drawFb').innerHTML=`<div class="fb ok">Parabéns! Escalonamento correto${r.falha?` até a falha em t=${r.falha.t} (T${r.falha.task+1} perde o deadline)`:` até t=${H}`}.</div>`;
 }
 
-function renderizarTasks(){
+function renderizarJobs(){
   const a=$('jobAlgo').value, r=simular(a);
-  let h='<table><tr><th>Job</th><th>Rel</th><th>Abs</th><th>Fim</th><th>Status</th></tr>';
-  r.Tasks.slice(0,30).forEach((j,idx)=>{
+  let h='<table><tr><th>Job</th><th>Rel</th><th>Abs</th><th>Fim</th><th>Resp</th><th>Folga</th><th>Status</th></tr>';
+  r.jobs.slice(0,35).forEach((j,idx)=>{
     const feito=j.fim!==undefined, ok=feito&&j.fim<=j.abs;
-    h+=`<tr><td style="color:${CORES[j.i%8]};font-weight:bold">T${j.i+1}</td><td>${j.rel}</td><td>${j.abs}</td><td>${feito?j.fim:'-'}</td><td>${ok?'<span class="verdict-ok">OK</span>':'<span class="verdict-bad">Perdido</span>'}</td></tr>`;
+    const resp = feito ? (j.fim - j.rel) : '-';
+    const folga = feito ? (j.abs - j.fim) : '-';
+    const perdido = !ok && (feito || (r.falha && j.abs<=r.falha.t));
+    const st = ok ? '<span class="verdict-ok">OK</span>' : perdido ? '<span class="verdict-bad">Perdido</span>' : '<span class="pill">Pendente</span>';
+    h+=`<tr><td style="color:${CORES[j.i%8]};font-weight:bold">T${j.i+1}</td><td>${j.rel}</td><td>${j.abs}</td><td>${feito?j.fim:'-'}</td><td>${resp}</td><td>${folga}</td><td>${st}</td></tr>`;
   });
-  $('Tasks').innerHTML=h+'</table>';
+  $('jobs').innerHTML=h+'</table>';
+}
+
+function novaDQ(){
+  const n=tarefas.length;
+  const distinto=new Set(tarefas.map(t=>t.p)).size>1;
+  const type=(n<2||!distinto)?0:rnd(0,1);
+  const dd=i=>tarefas[i].d||tarefas[i].p;
+  if(type===0){
+    const i=rnd(0,n-1), k=rnd(0,2), t=tarefas[i];
+    const ans=k*t.p + dd(i);
+    const opts=[...new Set([ans, (k+1)*t.p + dd(i), k*t.p + t.p, dd(i)])];
+    let extra=1;
+    while(opts.length<4){ const c=ans+extra++; if(!opts.includes(c)) opts.push(c); }
+    dq={
+      ans,
+      txt: `T${i+1} tem período ${t.p} e deadline relativo ${dd(i)}. Qual o deadline absoluto do job liberado em t=${k*t.p}?`,
+      options: opts,
+      task:false,
+      done:false
+    };
+  }else{
+    let i,j;
+    do{ i=rnd(0,n-1); j=rnd(0,n-1); }while(i===j||tarefas[i].p===tarefas[j].p);
+    dq={
+      ans: tarefas[i].p < tarefas[j].p ? i : j,
+      txt: `No Rate Monotonic, qual tem prioridade maior: T${i+1} (P=${tarefas[i].p}) ou T${j+1} (P=${tarefas[j].p})?`,
+      options: [i, j],
+      task:true,
+      done:false
+    };
+  }
+  $('dqBox').textContent = dq.txt;
+  const shuffled = [...dq.options].sort(()=>Math.random()-0.5);
+  $('dqOpts').innerHTML = shuffled.map(opt=>{
+    const label = dq.task ? `T${opt+1}` : opt;
+    return `<button onclick="responderDQ(${opt})">${label}</button>`;
+  }).join('');
+  $('dqFb').innerHTML = '';
+}
+
+function responderDQ(val){
+  if(!dq || dq.done) return;
+  dq.done=true;
+  const acertou = val === dq.ans;
+  if(acertou){ pontuacao+=10; sequencia++; } else { sequencia=0; }
+  if(pontuacao > melhor){ melhor = pontuacao; try{localStorage.setItem('rmsBest', melhor);}catch(e){} }
+  $('score').textContent=pontuacao; $('streak').textContent=sequencia; $('best').textContent=melhor;
+  $('dqFb').innerHTML = `<div class="fb ${acertou?'ok':'bad'}">${acertou?'Correto!':'Incorreto. Resposta: '+(dq.task?'T'+(dq.ans+1):dq.ans)+'.'}</div>`;
 }
 
 function carregarPreset(i){
@@ -401,7 +474,9 @@ function carregarPreset(i){
 }
 
 function questaoAleatoria(){
-  tarefas=[{p:10,d:null,c:2,pr:1},{p:15,d:null,c:3,pr:2},{p:25,d:null,c:5,pr:3}];
+  const pool=[6,8,10,12,15,20];
+  const p1=pool[rnd(0,pool.length-1)], p2=pool[rnd(0,pool.length-1)];
+  tarefas=[{p:p1,d:null,c:rnd(1,Math.floor(p1*0.3)),pr:1},{p:p2,d:null,c:rnd(1,Math.floor(p2*0.3)),pr:2}];
   H=60; $('H').value=H;
   atualizar(true);
 }
@@ -413,8 +488,9 @@ function atualizar(reset=false){
   renderizarFerramentas();
   if(reset || slots.length!==H) limparDesenho();
   else renderizarGrade();
-  renderizarTasks();
+  renderizarJobs();
   if(solAberta) renderizarSolucao();
+  if(reset) novaDQ();
 }
 
 function mudarAba(aba){
