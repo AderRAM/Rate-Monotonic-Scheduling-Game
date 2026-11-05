@@ -474,10 +474,32 @@ function carregarPreset(i){
 }
 
 function questaoAleatoria(){
-  const pool=[6,8,10,12,15,20];
-  const p1=pool[rnd(0,pool.length-1)], p2=pool[rnd(0,pool.length-1)];
-  tarefas=[{p:p1,d:null,c:rnd(1,Math.floor(p1*0.3)),pr:1},{p:p2,d:null,c:rnd(1,Math.floor(p2*0.3)),pr:2}];
-  H=60; $('H').value=H;
+  const idx=+$('preset').value||0;
+  const nivel=idx>=3?idx-3:1;
+  const cfg=[
+    {n:2,pool:[6,8,10,12,15,20],u:[.4,.7],h:60,dl:false},
+    {n:3,pool:[8,10,12,15,20,24],u:[.6,.85],h:80,dl:false},
+    {n:3,pool:[10,12,15,18,20,30],u:[.8,.95],h:100,dl:true},
+    {n:4,pool:[10,12,14,15,20,24,30,40],u:[.8,.98],h:120,dl:true},
+    {n:4,pool:[7,9,11,13,17,19,23],u:[.9,1],h:150,dl:true}
+  ][nivel];
+  let ts=[];
+  for(let tent=0; tent<500; tent++){
+    const ps=[...cfg.pool].sort(()=>Math.random()-0.5).slice(0,cfg.n).sort((a,b)=>a-b);
+    ts=ps.map((p,i)=>{
+      const c=rnd(1,Math.max(1,Math.floor(p*0.4)));
+      let d=null;
+      if(cfg.dl && Math.random()<0.6){
+        const dv=rnd(Math.max(c,Math.ceil(p*0.6)),p);
+        d=dv<p?dv:null;
+      }
+      return {p,d,c,pr:i+1};
+    });
+    const u=ts.reduce((s,t)=>s+t.c/t.p,0);
+    if(u>=cfg.u[0] && u<=cfg.u[1]) break;
+  }
+  tarefas=ts;
+  H=cfg.h; $('H').value=H;
   atualizar(true);
 }
 
