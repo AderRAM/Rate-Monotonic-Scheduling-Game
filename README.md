@@ -1,6 +1,6 @@
 RM Scheduling Game
 
-<img width="856" height="870" alt="image" src="https://github.com/user-attachments/assets/062f113b-868e-43bb-9069-f308c7162454" />
+<img width="843" height="834" alt="image" src="https://github.com/user-attachments/assets/1e67eaea-96a6-488f-8e69-6ae4ebe9d9b7" />
 
 Simulador de escalonamento de tempo real para estudar RM, EDF e DM. Fiz para treinar e corrigir as questões da disciplina de Sistemas em Tempo Real, já que o Cheddar não funcionou aqui.
 
